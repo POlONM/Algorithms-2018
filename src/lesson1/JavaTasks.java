@@ -2,14 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.*;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class JavaTasks {
@@ -40,29 +35,33 @@ public class JavaTasks {
      * 19:56:14
      * <p>
      * В случае обнаружения неверного формата файла бросить любое исключение.
+     * Сложность - O(n*log(n)), Ресурсоемкость - O(n).
      */
-    static public void sortTimes(String inputName, String outputName) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(inputName), StandardCharsets.UTF_8);
-        ArrayList<Double> seconds = new ArrayList<>();
-        ArrayList<String> result = new ArrayList<>();
-        for (String line : lines) {
+    static public void sortTimes(String inputName, String outputName) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(inputName));
+        List<Double> seconds = new ArrayList<>();
+        String line = reader.readLine();
+        while (line != null) {
             String[] split = line.split(":");
             double time = Double.valueOf(split[0]) * 3600
                     + Double.valueOf(split[1]) * 60
                     + Double.valueOf(split[2]);
             seconds.add(time);
+            line = reader.readLine();
         }
-        SortTask st = new SortTask();
-        st.sort(seconds);
+        reader.close();
+        Collections.sort(seconds);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
         for (Double second : seconds) {
             double h, m, s, t;
             t = second;
             h = t / 3600;
             m = (t % 3600) / 60;
             s = t % 60;
-            result.add((int)h + ":" + (int)m + ":" + (int)s + "\n");
+            writer.write(String.format("%02d:%02d:%02d", (int) h, (int) m, (int) s));
+            writer.newLine();
         }
-        Files.write(Paths.get(outputName), result, StandardOpenOption.CREATE);
+        writer.close();
     }
 
 
@@ -125,27 +124,26 @@ public class JavaTasks {
      * 24.7
      * 99.5
      * 121.3
+     * Ресурсоемкость - O(n), Сложность - O(n*log(n))
      */
-    static public void sortTemperatures(String inputName, String outputName) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(inputName), StandardCharsets.UTF_8);
-        ArrayList<Double> plus = new ArrayList<>();
-        ArrayList<Double> minus = new ArrayList<>();
-        for (String line : lines) {
-            SortTask st = new SortTask();
-            if (Double.valueOf(line) >= 0) {
-                plus.add(Double.valueOf(line));
-                st.sort(plus);
-            } else {
-                minus.add(Double.valueOf(line));
-                st.sort(minus);
-            }
+    static public void sortTemperatures(String inputName, String outputName) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(inputName));
+        List<Double> temp = new ArrayList<>();
+        String line = reader.readLine();
+        Pattern reg = Pattern.compile("(-)?[0-9]+.[0-9]");
+        while (line != null) {
+            if (!reg.matcher(line).matches()) throw new IllegalArgumentException();
+            temp.add(Double.valueOf(line));
+            line = reader.readLine();
         }
-        ArrayList<String> result = new ArrayList<>();
-        minus.addAll(plus);
-        for (Double num : minus) {
-            result.add(num.toString() + "\n");
+        reader.close();
+        Collections.sort(temp);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
+        for (double line2 : temp) {
+            writer.write(String.valueOf(line2));
+            writer.newLine();
         }
-        Files.write(Paths.get(outputName), result, StandardOpenOption.CREATE);
+        writer.close();
     }
 
     /**
@@ -176,36 +174,50 @@ public class JavaTasks {
      * 2
      * 2
      * 2
+     * Сложность - O(n*log(n)), Ресурсоемкость - O(n).
      */
-    static public void sortSequence(String inputName, String outputName) throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get(inputName), StandardCharsets.UTF_8);
-        int c = 0, min = 0, num = 0;
-        HashMap<Integer, Integer> pairs = new HashMap<>();
-        for (String line : lines) {
-            int key = Integer.valueOf(line);
-            if (key > min) min = key;
-            if (pairs.containsKey(line)) {
-                pairs.put(Integer.valueOf(line), pairs.get(line) +1);
-            } else {
-                pairs.put(Integer.valueOf(line), 1);
+    static public void sortSequence(String inputName, String outputName) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(inputName));
+        List<Integer> lines = new ArrayList<>();
+        String line = reader.readLine();
+        Pattern reg = Pattern.compile("[1-9][0-9]*");
+        while (line != null) {
+            if (!reg.matcher(line).matches()) throw new IllegalArgumentException();
+            lines.add(Integer.valueOf(line));
+            line = reader.readLine();
+        }
+        reader.close();
+        List<Integer> result = new ArrayList<>(lines);
+        Collections.sort(lines);
+        int maxRepeat = 1;
+        int repeat = 1;
+        int maxRepNum = lines.get(0);
+        for (int i = 1; i < lines.size(); i++) {
+            if (lines.get(i).equals(lines.get(i - 1))) {
+                repeat++;
+                if (i == lines.size() - 1 && maxRepeat < repeat) {
+                    maxRepeat = repeat;
+                    maxRepNum = lines.get(i - 1);
+                } else {
+                    if (maxRepeat < repeat) {
+                        maxRepeat = repeat;
+                        maxRepNum = lines.get(i - 1);
+                    }
+                }
+            } else repeat = 1;
+        }
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
+        for (int i = 0; i < result.size(); i++) {
+            if (!result.get(i).equals(maxRepNum)) {
+                writer.write(String.valueOf(result.get(i)));
+                writer.newLine();
             }
         }
-        for (Integer key : pairs.keySet()) {
-            if (pairs.get(key) > c || key < num && pairs.get(key) == c) {
-                c = pairs.get(key);
-                num = key;
-            }
+        for (int i = maxRepeat; i > 0; i--) {
+            writer.write(String.valueOf(maxRepNum));
+            writer.newLine();
         }
-        ArrayList<String> result = new ArrayList<>();
-        for (String line : lines) {
-            if (Integer.valueOf(line) != num){
-                result.add(line + "\n");
-            }
-        }
-        for (int i = 0; i < c; i++){
-            result.add(String.valueOf(num) + "\n");
-        }
-        Files.write(Paths.get(outputName), result, StandardOpenOption.CREATE);
+        writer.close();
     }
 
     /**
