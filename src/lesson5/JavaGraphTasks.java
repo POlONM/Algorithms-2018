@@ -136,7 +136,7 @@ public class JavaGraphTasks {
      * <p>
      * Ответ: A, E, J, K, D, C, H, G, B, F, I
      *
-     * Сложность- , Ресурсоемкость- O(V).
+     * Сложность- O(V!), Ресурсоемкость- O(V).
      */
     public static Path longestSimplePath(Graph graph) {
         List<Graph.Vertex> way = new ArrayList<>();
