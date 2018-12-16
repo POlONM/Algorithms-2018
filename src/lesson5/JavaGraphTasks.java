@@ -151,7 +151,8 @@ public class JavaGraphTasks {
         return path;
     }
 
-    private static void searchWay(List<Graph.Vertex> way, List<Graph.Vertex> res, Graph graph, Graph.Vertex vertex) {
+    private static void searchWay(List<Graph.Vertex> way, List<Graph.Vertex> res,
+                                  Graph graph, Graph.Vertex vertex) {
         for (Graph.Vertex neighbour : graph.getNeighbors(vertex)) {
             if (!way.contains(neighbour)) {
                 way.add(neighbour);

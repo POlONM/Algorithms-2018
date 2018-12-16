@@ -190,7 +190,8 @@ abstract class AbstractGraphTests {
             addConnection(z, q)
         }.build()
         val independent2 = graph2.largestIndependentVertexSet()
-        assertEquals(setOf(graph2["Q"], graph2["R"], graph2["D"], graph2["U"], graph2["W"], graph2["G"], graph2["X"], graph2["M"]),
+        assertEquals(setOf(graph2["Q"], graph2["R"], graph2["D"],
+                graph2["U"], graph2["W"], graph2["G"], graph2["X"], graph2["M"]),
                 independent2)
     }
 
